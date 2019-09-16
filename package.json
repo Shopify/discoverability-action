@@ -1,0 +1,31 @@
+{
+  "name": "discoverability-action",
+  "description": "Adds a comment to a pull request with areas of your code to test",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.js",
+  "scripts": {
+    "watch": "ncc build index.ts --watch --minify",
+    "build": "ncc build index.ts --minify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/discoverability-action.git"
+  },
+  "keywords": [],
+  "author": "Andre Rocha",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Shopify/discoverability-action/issues"
+  },
+  "homepage": "https://github.com/Shopify/discoverability-action#readme",
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "husky": "^3.0.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run build && git add ./dist/index.js"
+    }
+  }
+}

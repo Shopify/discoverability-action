@@ -1,0 +1,9 @@
+name: 'Discoverability action'
+description: 'Adds a comment to a pull request with areas of your code to test'
+author: 'Andre Rocha <andre.rocha@shopify.com>'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: 'cloud'
+  color: 'gray-dark'
