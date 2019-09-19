@@ -1,3 +1,25 @@
 {
-	
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "declaration": true,
+    "jsx": "react-native",
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noEmit": true,
+    "importHelpers": true,
+    "lib": ["dom", "dom.iterable", "es2017", "scripthost"],
+    "strictFunctionTypes": false,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": false
+  },
+  "paths": {
+    "@shopify/*": ["index.ts"]
+  }
 }

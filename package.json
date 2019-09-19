@@ -5,8 +5,10 @@
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
-    "watch": "ncc build index.ts --watch --minify",
-    "build": "ncc build index.ts --minify"
+    "dev": "ncc build index.ts --watch --minify",
+    "build": "ncc build index.ts --minify",
+    "test": "",
+    "lint": "yarn run eslint '**/*.{js,ts,tsx}'"
   },
   "repository": {
     "type": "git",
@@ -19,13 +21,103 @@
     "url": "https://github.com/Shopify/discoverability-action/issues"
   },
   "homepage": "https://github.com/Shopify/discoverability-action#readme",
-  "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "husky": "^3.0.5"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "npm run build && git add ./dist/index.js"
     }
+  },
+  "devDependencies": {
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^5.16.0",
+    "eslint-plugin-shopify": "^28.0.0",
+    "husky": "^3.0.5",
+    "prettier": "^1.16.4",
+    "stylelint": "^9.10.1",
+    "stylelint-config-shopify": "^7.1.0"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": false
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:shopify/typescript",
+      "plugin:shopify/react",
+      "plugin:shopify/jest",
+      "plugin:shopify/node",
+      "plugin:shopify/prettier"
+    ],
+    "settings": {
+      "react": {
+        "version": "16.7"
+      }
+    },
+    "rules": {
+      "no-console": "off",
+      "node/exports-style": "off",
+      "react/prop-types": "off",
+      "shopify/jsx-no-hardcoded-content": "off",
+      "shopify/jsx-prefer-fragment-wrappers": "off"
+    },
+    "overrides": [
+      {
+        "files": [
+          "**/rollup.config.js",
+          "**/tests/*.js",
+          "**/scripts/*.js"
+        ],
+        "rules": {
+          "import/no-extraneous-dependencies": "off",
+          "node/no-extraneous-require": "off"
+        }
+      },
+      {
+        "files": [
+          "packages/polaris-icons/src/index.ts",
+          "packages/polaris-icons-internal/src/index.ts"
+        ],
+        "rules": {
+          "shopify/images-no-direct-imports": "off"
+        }
+      },
+      {
+        "files": [
+          "packages/app-icon-explorer/**/*"
+        ],
+        "rules": {
+          "id-length": [
+            "error",
+            {
+              "min": 2,
+              "exceptions": [
+                "_",
+                "q"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "stylelint": {
+    "extends": [
+      "stylelint-config-shopify/prettier"
+    ],
+    "rules": {
+      "selector-pseudo-class-no-unknown": [
+        true,
+        {
+          "ignorePseudoClasses": [
+            "global"
+          ]
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "node-cmd": "^3.0.0",
+    "typescript": "^3.6.3"
   }
 }

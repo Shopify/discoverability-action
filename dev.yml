@@ -1,0 +1,16 @@
+name: discoverability-action
+up:
+  - node:
+      yarn: true
+      version: v10.13.0 # to be kept in sync with .nvmrc, package.json, and .shopify-build/polaris-icons.yml
+  - homebrew:
+      - librsvg
+      - swiftgen
+
+open:
+  shipit: https://shipit.shopify.io/shopify/polaris-icons/testing
+commands:
+  test:
+    run: yarn run test
+  start:
+    run: yarn run dev
