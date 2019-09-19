@@ -1,19 +1,17 @@
-import {getInput} from '@actions/core';
-import github from '@actions/github';
+// import {getInput} from '@actions/core';
 import {getDependencies} from './splash/treebuilder';
 
-console.log(
-  getInput('codebaseGlob'),
-  getInput('ignoreGlob'),
-  getInput('fileGlobs').split(' '),
-);
+// console.log(
+//   getDependencies(
+//     getInput('codebaseGlob'),
+//     getInput('ignoreGlob'),
+//     getInput('fileGlobs').split(' '),
+//   ),
+// );
 
-console.log(JSON.stringify(github.context.payload, undefined, 2));
-
 console.log(
-  getDependencies(
-    getInput('codebaseGlob'),
-    getInput('ignoreGlob'),
-    getInput('fileGlobs').split(' '),
-  ),
+  getDependencies('src/**/*.tsx', 'src/**/*.test.tsx', [
+    'src/components/Button/Button.tsx',
+    'src/components/Avatar/Avatar.tsx',
+  ]),
 );
