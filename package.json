@@ -117,6 +117,8 @@
     }
   },
   "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@actions/github": "^1.1.0",
     "node-cmd": "^3.0.0",
     "typescript": "^3.6.3"
   }

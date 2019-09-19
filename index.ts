@@ -1,5 +1,19 @@
+import {getInput} from '@actions/core';
+import github from '@actions/github';
 import {getDependencies} from './splash/treebuilder';
 
 console.log(
-  getDependencies(process.argv[2], process.argv[3], process.argv.slice(4)),
+  getInput('codebaseGlob'),
+  getInput('ignoreGlob'),
+  getInput('fileGlobs').split(' '),
+);
+
+console.log(JSON.stringify(github.context.payload, undefined, 2));
+
+console.log(
+  getDependencies(
+    getInput('codebaseGlob'),
+    getInput('ignoreGlob'),
+    getInput('fileGlobs').split(' '),
+  ),
 );

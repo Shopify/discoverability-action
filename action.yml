@@ -1,6 +1,16 @@
 name: 'Discoverability action'
 description: 'Adds a comment to a pull request with areas of your code to test'
 author: 'Andre Rocha <andre.rocha@shopify.com>'
+inputs:
+  codebaseGlob:
+    description: 'Glob of the codebase to be parsed into a dependency graph'
+    required: true
+  ignoreGlob:
+    description: 'Glob of files to be ignored'
+    required: true
+  fileGlobs:
+    description: 'Glob of files to determine the splash zone for'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
