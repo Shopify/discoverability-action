@@ -151,8 +151,6 @@ export async function getDependencies(
       dependencyList.map((dependency) => dependency.split(gitRootDirectory)[1]),
     );
 
-  console.log(dependencies);
-
   return fileGlobs.map((fileGlob, index) => ({
     fileName: fileGlob,
     dependencies: dependencies[index],
