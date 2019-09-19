@@ -87,11 +87,9 @@ function findDependencies(fileName: string) {
     }
   }
 
-  return Object.keys(dependencies)
-    .filter(
-      (dependency) => !/(components\/)(\w*\/)?(index.ts)/.test(dependency),
-    )
-    .map((dependency) => dependency.split('polaris-react/')[1]);
+  return Object.keys(dependencies).filter(
+    (dependency) => !/(components\/)(\w*\/)?(index.ts)/.test(dependency),
+  );
 }
 
 export function getGitStagedFiles(scope = '') {
@@ -116,7 +114,7 @@ export function getGitStagedFiles(scope = '') {
   });
 }
 
-export function getDependencies(
+export async function getDependencies(
   codebaseGlob: string,
   ignoreGlob: string,
   fileGlobs: string[],
@@ -132,10 +130,28 @@ export function getDependencies(
     module: ts.ModuleKind.CommonJS,
   });
 
+  const rawGitRootDirectory = await new Promise<string>((resolve, reject) => {
+    cmd.get(
+      'git rev-parse --show-toplevel',
+      (err: any, gitRootDirectory: string) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(gitRootDirectory);
+      },
+    );
+  });
+  const gitRootDirectory = rawGitRootDirectory.trim();
+
   const dependencies = fileGlobs
     .map((fileGlob) => glob.sync(fileGlob))
     .reduce((accumulator, current) => [...accumulator, ...current], [])
-    .map(findDependencies);
+    .map(findDependencies)
+    .map((dependencyList) =>
+      dependencyList.map((dependency) => dependency.split(gitRootDirectory)[1]),
+    );
+
+  console.log(dependencies);
 
   return fileGlobs.map((fileGlob, index) => ({
     fileName: fileGlob,
