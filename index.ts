@@ -1,5 +1,5 @@
 import {getInput} from '@actions/core';
-import {context} from '@actions/github';
+import {GitHub, context} from '@actions/github';
 import {getDependencies} from './splash/treebuilder';
 
 getDependencies(
@@ -13,6 +13,24 @@ getDependencies(
   .catch((err) => {
     console.log(err);
   });
+
+const myToken = getInput('myToken');
+const octokit = new GitHub(myToken);
+
+if (context.payload.pull_request) {
+  octokit.pulls
+    .listFiles({
+      owner: context.payload.pull_request.base.repo.owner.login,
+      repo: context.payload.pull_request.base.repo.name,
+      pull_number: context.payload.number, // eslint-disable-line babel/camelcase
+    })
+    .then((result) => {
+      console.log(result);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
 
 console.log(JSON.stringify(context, undefined, 2));
 
