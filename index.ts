@@ -51,7 +51,7 @@ ${JSON.stringify(dependencies, undefined, 2)}`,
       issue_number: context.payload.number, // eslint-disable-line babel/camelcase
     });
 
-    console.log(commentsList);
+    console.log(JSON.stringify(commentsList, undefined, 2));
   }
 }
 
