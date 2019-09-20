@@ -15,7 +15,11 @@ async function main() {
 
     let comment = commentsList.data.find((comment) => {
       console.log('NVJCFGJHVKJFJYCGVKYFCTUGJVHVJ');
-      console.log(comment.user.type, comment.user.login, comment.body.slice);
+      console.log(
+        comment.user.type,
+        comment.user.login,
+        comment.body.slice(0, 22),
+      );
       console.log('NVJCFGJHVKJFJYCGVKYFCTUGJVHVJ');
       return (
         comment.user.type === 'bot' &&
@@ -52,7 +56,6 @@ Building dependency graph...`,
       comment = newComment.data;
 
       console.log('Done!');
-      console.log('============================================');
     }
 
     const requestRawData = await octokit.pulls.listFiles({
@@ -80,7 +83,6 @@ Building dependency graph...`,
     console.log('These are the dependencies calculated:');
     console.log(dependencies);
     console.log('============================================');
-    console.log('============================================');
     console.log('Updating comment...');
 
     await octokit.issues.updateComment({
@@ -91,6 +93,9 @@ Building dependency graph...`,
 
 ${JSON.stringify(dependencies, undefined, 2)}`,
     });
+
+    console.log('Done!');
+    console.log('============================================');
   }
 }
 
