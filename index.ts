@@ -14,8 +14,8 @@ getDependencies(
     console.log(err);
   });
 
-const myToken = getInput('myToken');
-const octokit = new GitHub(myToken);
+const githubToken = getInput('githubToken');
+const octokit = new GitHub(githubToken);
 
 if (context.payload.pull_request) {
   octokit.pulls
