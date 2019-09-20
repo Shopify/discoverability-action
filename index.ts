@@ -7,6 +7,50 @@ async function main() {
   const octokit = new GitHub(githubToken);
 
   if (context.payload.pull_request) {
+    const commentsList = await octokit.issues.listComments({
+      owner: context.payload.pull_request.base.repo.owner.login,
+      repo: context.payload.pull_request.base.repo.name,
+      issue_number: context.payload.number, // eslint-disable-line babel/camelcase
+    });
+
+    let comment: any = commentsList.data.find((comment) => {
+      return (
+        comment.user.type === 'bot' &&
+        comment.user.login === 'github-actions[bot]' &&
+        comment.body.slice(0, 22) === 'discoverability-action'
+      );
+    });
+
+    if (comment) {
+      console.log('============================================');
+      console.log('Updating comment with placeholder...');
+
+      console.log(comment);
+      await octokit.issues.updateComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        comment_id: comment.id, // eslint-disable-line babel/camelcase
+        body: `discoverability-action:
+
+Building dependency graph...`,
+      });
+    } else {
+      console.log('Posting comment...');
+
+      comment = await octokit.issues.createComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        issue_number: context.payload.number, // eslint-disable-line babel/camelcase
+        body: `discoverability-action:
+
+Building dependency graph...`,
+      });
+      console.log(comment);
+
+      console.log('Done!');
+      console.log('============================================');
+    }
+
     const requestRawData = await octokit.pulls.listFiles({
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
@@ -32,26 +76,17 @@ async function main() {
     console.log('These are the dependencies calculated:');
     console.log(dependencies);
     console.log('============================================');
-    console.log('Posting comment to github...');
+    console.log('============================================');
+    console.log('Updating comment...');
 
-    await octokit.issues.createComment({
+    await octokit.issues.updateComment({
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
-      issue_number: context.payload.number, // eslint-disable-line babel/camelcase
-      body: `discoverability-action output:
+      comment_id: comment.id, // eslint-disable-line babel/camelcase
+      body: `discoverability-action:
 
 ${JSON.stringify(dependencies, undefined, 2)}`,
     });
-
-    console.log('Done!');
-
-    const commentsList = await octokit.issues.listComments({
-      owner: context.payload.pull_request.base.repo.owner.login,
-      repo: context.payload.pull_request.base.repo.name,
-      issue_number: context.payload.number, // eslint-disable-line babel/camelcase
-    });
-
-    console.log(JSON.stringify(commentsList, undefined, 2));
   }
 }
 
