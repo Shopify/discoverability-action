@@ -38,10 +38,20 @@ async function main() {
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
       issue_number: context.payload.number, // eslint-disable-line babel/camelcase
-      body: JSON.stringify(dependencies, undefined, 2),
+      body: `discoverability-action output:
+
+${JSON.stringify(dependencies, undefined, 2)}`,
     });
 
     console.log('Done!');
+
+    const commentsList = await octokit.issues.listComments({
+      owner: context.payload.pull_request.base.repo.owner.login,
+      repo: context.payload.pull_request.base.repo.name,
+      issue_number: context.payload.number, // eslint-disable-line babel/camelcase
+    });
+
+    console.log(commentsList);
   }
 }
 
