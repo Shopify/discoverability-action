@@ -13,7 +13,10 @@ async function main() {
       issue_number: context.payload.number, // eslint-disable-line babel/camelcase
     });
 
-    let comment: any = commentsList.data.find((comment) => {
+    let comment = commentsList.data.find((comment) => {
+      console.log('NVJCFGJHVKJFJYCGVKYFCTUGJVHVJ');
+      console.log(comment.user.type, comment.user.login, comment.body.slice);
+      console.log('NVJCFGJHVKJFJYCGVKYFCTUGJVHVJ');
       return (
         comment.user.type === 'bot' &&
         comment.user.login === 'github-actions[bot]' &&
@@ -37,7 +40,7 @@ Building dependency graph...`,
     } else {
       console.log('Posting comment...');
 
-      comment = await octokit.issues.createComment({
+      const newComment = await octokit.issues.createComment({
         owner: context.payload.pull_request.base.repo.owner.login,
         repo: context.payload.pull_request.base.repo.name,
         issue_number: context.payload.number, // eslint-disable-line babel/camelcase
@@ -45,7 +48,8 @@ Building dependency graph...`,
 
 Building dependency graph...`,
       });
-      console.log(comment);
+
+      comment = newComment.data;
 
       console.log('Done!');
       console.log('============================================');
