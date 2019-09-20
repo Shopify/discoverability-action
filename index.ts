@@ -2,37 +2,31 @@ import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
 import {getDependencies} from './splash/treebuilder';
 
-getDependencies(
-  getInput('codebaseGlob'),
-  getInput('ignoreGlob'),
-  getInput('fileGlobs').split(' '),
-)
-  .then((result) => {
-    console.log(result);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+async function main() {
+  const githubToken = getInput('githubToken');
+  const octokit = new GitHub(githubToken);
 
-const githubToken = getInput('githubToken');
-const octokit = new GitHub(githubToken);
-
-if (context.payload.pull_request) {
-  octokit.pulls
-    .listFiles({
+  if (context.payload.pull_request) {
+    const requestRawData = await octokit.pulls.listFiles({
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
       pull_number: context.payload.number, // eslint-disable-line babel/camelcase
-    })
-    .then((result) => {
-      console.log(result);
-    })
-    .catch((err) => {
-      console.log(err);
     });
+
+    const files = requestRawData.data.map((datum) => datum.filename);
+
+    console.log(files);
+
+    const dependencies = await getDependencies(
+      getInput('codebaseGlob'),
+      getInput('ignoreGlob'),
+      files,
+    );
+    console.log(dependencies);
+  }
 }
 
-console.log(JSON.stringify(context, undefined, 2));
+main();
 
 // getDependencies('src/**/*.tsx', 'src/**/*.test.tsx', [
 //   'src/components/DatePicker/DatePicker.tsx',
