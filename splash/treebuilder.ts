@@ -13,6 +13,11 @@ type GraphType = {
   [name: string]: Node;
 };
 
+export type Dependencies = {
+  fileName: string;
+  dependencies: string[];
+}[];
+
 const graph: GraphType = {};
 
 function compile(fileNames: string[], options: ts.CompilerOptions): void {
@@ -118,7 +123,7 @@ export async function getDependencies(
   codebaseGlob: string,
   ignoreGlob: string,
   fileGlobs: string[],
-) {
+): Promise<Dependencies> {
   const codebase = glob.sync(codebaseGlob, {
     ignore: ignoreGlob,
   });
