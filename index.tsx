@@ -97,21 +97,10 @@ function commentMarkup(dependencies: Dependencies | undefined) {
   return renderToStaticMarkup(
     <>
       discoverability-action:
-      <h1>Testing haha</h1>
+      <h1>Test0ng haha</h1>
       {dependencyMarkup}
     </>,
   );
 }
 
 main();
-
-// getDependencies('src/**/*.tsx', 'src/**/*.test.tsx', [
-//   'src/components/DatePicker/DatePicker.tsx',
-// ])
-//   .then((result) => {
-//     console.log(result);
-//     debugger;
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
