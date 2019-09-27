@@ -136,12 +136,12 @@ function formatDependencies(dependencies: Dependencies, context: any) {
         dependency.dependencies.length
       })</summary>
 
-| Files potentially affected (total: ${dependency.dependencies.length}) |
-| :--- |
+#### Files potentially affected (total: ${dependency.dependencies.length})
+
 ${dependency.dependencies
   .reduce((accumulator, nextDependency) => {
     return `${accumulator}
-| [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency}) |`;
+- [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
   }, '')
   .trim()}
 </details>`,
