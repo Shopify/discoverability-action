@@ -1,6 +1,6 @@
 import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
-// import {Dependencies} from './splash/treebuilder';
+import {getDependencies, Dependencies} from './splash/treebuilder';
 
 enum CommentState {
   Loading,
@@ -10,7 +10,7 @@ enum CommentState {
 }
 
 const CODEBASE_GLOB = getInput('codebaseGlob');
-// const IGNORE_GLOB = getInput('ignoreGlob');
+const IGNORE_GLOB = getInput('ignoreGlob');
 
 async function main() {
   if (!context.payload.pull_request) {
@@ -60,54 +60,53 @@ async function main() {
   }
 
   try {
-    throw new Error('I dont wanna do it anymore');
-    // const requestRawData = await client.pulls.listFiles({
-    //   owner: context.payload.pull_request.base.repo.owner.login,
-    //   repo: context.payload.pull_request.base.repo.name,
-    //   pull_number: context.payload.number, // eslint-disable-line babel/camelcase
-    // });
+    const requestRawData = await client.pulls.listFiles({
+      owner: context.payload.pull_request.base.repo.owner.login,
+      repo: context.payload.pull_request.base.repo.name,
+      pull_number: context.payload.number, // eslint-disable-line babel/camelcase
+    });
 
-    // const files = requestRawData.data.map((datum) => datum.filename);
+    const files = requestRawData.data.map((datum) => datum.filename);
 
-    // console.log('============================================');
-    // console.log(
-    //   'These are the files for which the splash zone is being calculated:',
-    // );
-    // console.log(files);
-    // console.log('============================================');
+    console.log('============================================');
+    console.log(
+      'These are the files for which the splash zone is being calculated:',
+    );
+    console.log(files);
+    console.log('============================================');
 
-    // const dependencies = await getDependencies(
-    //   CODEBASE_GLOB,
-    //   IGNORE_GLOB,
-    //   files,
-    // );
+    const dependencies = await getDependencies(
+      CODEBASE_GLOB,
+      IGNORE_GLOB,
+      files,
+    );
 
-    // console.log('============================================');
-    // console.log('These are the dependencies calculated:');
-    // console.log(dependencies);
-    // console.log('============================================');
-    // console.log('Updating comment...');
+    console.log('============================================');
+    console.log('These are the dependencies calculated:');
+    console.log(dependencies);
+    console.log('============================================');
+    console.log('Updating comment...');
 
-    // if (dependencies.some((dependency) => dependency.dependencies.length > 0)) {
-    //   const formattedDependencies = formatDependencies(dependencies, context);
+    if (dependencies.some((dependency) => dependency.dependencies.length > 0)) {
+      const formattedDependencies = formatDependencies(dependencies, context);
 
-    //   await client.issues.updateComment({
-    //     owner: context.payload.pull_request.base.repo.owner.login,
-    //     repo: context.payload.pull_request.base.repo.name,
-    //     comment_id: comment.id, // eslint-disable-line babel/camelcase
-    //     body: commentMarkup(CommentState.Changes, formattedDependencies),
-    //   });
-    // } else {
-    //   await client.issues.updateComment({
-    //     owner: context.payload.pull_request.base.repo.owner.login,
-    //     repo: context.payload.pull_request.base.repo.name,
-    //     comment_id: comment.id, // eslint-disable-line babel/camelcase
-    //     body: commentMarkup(CommentState.NoChanges, undefined),
-    //   });
-    // }
+      await client.issues.updateComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        comment_id: comment.id, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.Changes, formattedDependencies),
+      });
+    } else {
+      await client.issues.updateComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        comment_id: comment.id, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.NoChanges, undefined),
+      });
+    }
 
-    // console.log('Done!');
-    // console.log('============================================');
+    console.log('Done!');
+    console.log('============================================');
   } catch (error) {
     await client.issues.updateComment({
       owner: context.payload.pull_request.base.repo.owner.login,
@@ -119,41 +118,41 @@ async function main() {
   }
 }
 
-// function formatDependencies(dependencies: Dependencies, context: any) {
-//   let returnString = `<table><tbody>
-// <tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
-// <tr><th align="left">Files potentially affected</th><td>${dependencies.reduce(
-//     (acc, next) => acc + next.dependencies.length,
-//     0,
-//   )}</td></tr>
-// </tbody></table>
+function formatDependencies(dependencies: Dependencies, context: any) {
+  let returnString = `<table><tbody>
+<tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
+<tr><th align="left">Files potentially affected</th><td>${dependencies.reduce(
+    (acc, next) => acc + next.dependencies.length,
+    0,
+  )}</td></tr>
+</tbody></table>
 
-// ### Details`;
+### Details`;
 
-//   const tables = dependencies.map(
-//     (dependency) =>
-//       `<details>
-// <summary>🧩 <code><strong>${dependency.fileName}</strong></code> (${
-//         dependency.dependencies.length
-//       })</summary>
+  const tables = dependencies.map(
+    (dependency) =>
+      `<details>
+<summary>🧩 <code><strong>${dependency.fileName}</strong></code> (${
+        dependency.dependencies.length
+      })</summary>
 
-// | Files potentially affected (total: ${dependency.dependencies.length}) |
-// | :--- |
-// ${dependency.dependencies
-//   .reduce((accumulator, nextDependency) => {
-//     return `${accumulator}
-// | [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency}) |`;
-//   }, '')
-//   .trim()}
-// </details>`,
-//   );
+| Files potentially affected (total: ${dependency.dependencies.length}) |
+| :--- |
+${dependency.dependencies
+  .reduce((accumulator, nextDependency) => {
+    return `${accumulator}
+| [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency}) |`;
+  }, '')
+  .trim()}
+</details>`,
+  );
 
-//   returnString = `${returnString}
+  returnString = `${returnString}
 
-// ${tables.join('\n\n')}`;
+${tables.join('\n\n')}`;
 
-//   return returnString;
-// }
+  return returnString;
+}
 
 function commentMarkup(state: CommentState, text: string | undefined) {
   if (state === CommentState.Loading) {
@@ -204,7 +203,7 @@ Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tool
 cc @amrocha @kaelig
 
 <details>
-<summary>Stack trace:</summary>
+<summary>Error message:</summary>
 
 <code>
 ${text}
