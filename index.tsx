@@ -132,7 +132,9 @@ function formatDependencies(dependencies: Dependencies) {
   const tables = dependencies.map(
     (dependency) =>
       `<details>
-<summary>🧩 <code><strong>${dependency.fileName}</strong></code> (2)</summary>
+<summary>🧩 <code><strong>${dependency.fileName}</strong></code> (${
+        dependency.dependencies.length
+      })</summary>
 
 | Files potentially affected (total: ${dependency.dependencies.length}) |
 | :--- |
@@ -143,7 +145,9 @@ ${dependency.dependencies.reduce((accumulator, nextDependency) => {
 </details>`,
   );
 
-  returnString = `${returnString} ${tables.join('\n\n')}`;
+  returnString = `${returnString}
+
+${tables.join('\n\n')}`;
 
   return returnString;
 }
