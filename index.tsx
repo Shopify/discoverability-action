@@ -13,6 +13,7 @@ const CODEBASE_GLOB = getInput('codebaseGlob');
 const IGNORE_GLOB = getInput('ignoreGlob');
 
 async function main() {
+  console.log(JSON.stringify(context));
   if (!context.payload.pull_request) {
     return;
   }
@@ -88,7 +89,7 @@ async function main() {
     console.log('Updating comment...');
 
     if (dependencies.some((dependency) => dependency.dependencies.length > 0)) {
-      const formattedDependencies = formatDependencies(dependencies);
+      const formattedDependencies = formatDependencies(dependencies, context);
 
       await client.issues.updateComment({
         owner: context.payload.pull_request.base.repo.owner.login,
@@ -118,7 +119,7 @@ async function main() {
   }
 }
 
-function formatDependencies(dependencies: Dependencies) {
+function formatDependencies(dependencies: Dependencies, context: any) {
   let returnString = `<table><tbody>
 <tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
 <tr><th align="left">Files potentially affected</th><td>${dependencies.reduce(
@@ -140,8 +141,8 @@ function formatDependencies(dependencies: Dependencies) {
 | :--- |
 ${dependency.dependencies.reduce((accumulator, nextDependency) => {
   return `${accumulator}
-| [\`${nextDependency}\`]() |`;
-})}
+| [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/testing/src/components/ResourceList/components/FilterControl/components/FilterValueSelector/FilterValueSelector.tsx) |`;
+}, '')}
 </details>`,
   );
 
