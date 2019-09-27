@@ -30,7 +30,7 @@ async function main() {
     return (
       comment.user.type === 'Bot' &&
       comment.user.login === 'github-actions[bot]' &&
-      comment.body.slice(0, 22) === 'discoverability-action'
+      comment.body.slice(0, 31) === '<!-- discoverability-action -->'
     );
   });
 
