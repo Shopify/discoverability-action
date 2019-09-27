@@ -1,8 +1,16 @@
-import React from 'react';
-import {renderToStaticMarkup} from 'react-dom/server';
 import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
 import {getDependencies, Dependencies} from './splash/treebuilder';
+
+enum CommentState {
+  Loading,
+  Error,
+  NoChanges,
+  Changes,
+}
+
+const CODEBASE_GLOB = getInput('codebaseGlob');
+const IGNORE_GLOB = getInput('ignoreGlob');
 
 async function main() {
   if (!context.payload.pull_request) {
@@ -34,7 +42,7 @@ async function main() {
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
       comment_id: comment.id, // eslint-disable-line babel/camelcase
-      body: commentMarkup(undefined),
+      body: commentMarkup(CommentState.Loading, undefined),
     });
   } else {
     console.log('Posting comment...');
@@ -43,7 +51,7 @@ async function main() {
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
       issue_number: context.payload.number, // eslint-disable-line babel/camelcase
-      body: commentMarkup(undefined),
+      body: commentMarkup(CommentState.Loading, undefined),
     });
 
     comment = newComment.data;
@@ -51,56 +59,157 @@ async function main() {
     console.log('Done!');
   }
 
-  const requestRawData = await client.pulls.listFiles({
-    owner: context.payload.pull_request.base.repo.owner.login,
-    repo: context.payload.pull_request.base.repo.name,
-    pull_number: context.payload.number, // eslint-disable-line babel/camelcase
-  });
+  try {
+    const requestRawData = await client.pulls.listFiles({
+      owner: context.payload.pull_request.base.repo.owner.login,
+      repo: context.payload.pull_request.base.repo.name,
+      pull_number: context.payload.number, // eslint-disable-line babel/camelcase
+    });
 
-  const files = requestRawData.data.map((datum) => datum.filename);
+    const files = requestRawData.data.map((datum) => datum.filename);
 
-  console.log('============================================');
-  console.log(
-    'These are the files for which the splash zone is being calculated:',
-  );
-  console.log(files);
-  console.log('============================================');
+    console.log('============================================');
+    console.log(
+      'These are the files for which the splash zone is being calculated:',
+    );
+    console.log(files);
+    console.log('============================================');
 
-  const dependencies = await getDependencies(
-    getInput('codebaseGlob'),
-    getInput('ignoreGlob'),
-    files,
-  );
+    const dependencies = await getDependencies(
+      CODEBASE_GLOB,
+      IGNORE_GLOB,
+      files,
+    );
 
-  console.log('============================================');
-  console.log('These are the dependencies calculated:');
-  console.log(dependencies);
-  console.log('============================================');
-  console.log('Updating comment...');
+    console.log('============================================');
+    console.log('These are the dependencies calculated:');
+    console.log(dependencies);
+    console.log('============================================');
+    console.log('Updating comment...');
 
-  await client.issues.updateComment({
-    owner: context.payload.pull_request.base.repo.owner.login,
-    repo: context.payload.pull_request.base.repo.name,
-    comment_id: comment.id, // eslint-disable-line babel/camelcase
-    body: commentMarkup(dependencies),
-  });
+    if (dependencies.some((dependency) => dependency.dependencies.length > 0)) {
+      const formattedDependencies = formatDependencies(dependencies);
 
-  console.log('Done!');
-  console.log('============================================');
+      await client.issues.updateComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        comment_id: comment.id, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.Changes, formattedDependencies),
+      });
+    } else {
+      await client.issues.updateComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        comment_id: comment.id, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.NoChanges, undefined),
+      });
+    }
+
+    console.log('Done!');
+    console.log('============================================');
+  } catch (error) {
+    await client.issues.updateComment({
+      owner: context.payload.pull_request.base.repo.owner.login,
+      repo: context.payload.pull_request.base.repo.name,
+      comment_id: comment.id, // eslint-disable-line babel/camelcase
+      body: commentMarkup(CommentState.Error, error),
+    });
+    throw error;
+  }
 }
 
-function commentMarkup(dependencies: Dependencies | undefined) {
-  const dependencyMarkup = dependencies
-    ? JSON.stringify(dependencies, undefined, 2)
-    : 'Building dependency graph...';
+function formatDependencies(dependencies: Dependencies) {
+  let returnString = `<table><tbody>
+<tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
+<tr><th align="left">Files potentially affected</th><td>${dependencies.reduce(
+    (acc, next) => acc + next.dependencies.length,
+    0,
+  )}</td></tr>
+</tbody></table>
 
-  return renderToStaticMarkup(
-    <>
-      discoverability-action:
-      <h1>Test0ng haha</h1>
-      {dependencyMarkup}
-    </>,
+### Details`;
+
+  const tables = dependencies.map(
+    (dependency) =>
+      `<details>
+<summary>🧩 <code><strong>${dependency.fileName}</strong></code> (2)</summary>
+
+| Files potentially affected (total: ${dependency.dependencies.length}) |
+| :--- |
+${dependency.dependencies.reduce((accumulator, nextDependency) => {
+  return `${accumulator}
+| [\`${nextDependency}\`]() |`;
+})}
+</details>`,
   );
+
+  returnString = `${returnString} ${tables.join('\n\n')}`;
+
+  return returnString;
+}
+
+function commentMarkup(state: CommentState, text: string | undefined) {
+  if (state === CommentState.Loading) {
+    return `<!-- discoverability-action -->
+# Loading state
+
+💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
+
+⏳ Please wait while I’m computing the dependency graph…
+
+---
+
+This comment automatically updates as changes are made to this pull request.
+Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).
+`;
+  } else if (state === CommentState.Changes) {
+    return `<!-- discoverability-action -->
+# Results state
+
+💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
+
+${text}
+
+---
+
+This comment automatically updates as changes are made to this pull request.
+Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
+  } else if (state === CommentState.NoChanges) {
+    return `<!-- discoverability-action -->
+# "No changes" state
+
+💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
+
+No significant changes to \`${CODEBASE_GLOB}\` were detected.
+
+---
+
+This comment automatically updates as changes are made to this pull request.
+Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
+  } else if (state === CommentState.Error) {
+    return `<!-- discoverability-action -->
+# Error state
+
+💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
+
+❌ Something fishy happened. We’re on it!
+
+cc @amrocha @kaelig
+
+<details>
+<summary>Stack trace:</summary>
+
+<code>
+${text}
+</code>
+</details>
+
+---
+
+This comment automatically updates as changes are made to this pull request.
+Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
+  }
+  return '';
 }
 
 main();
