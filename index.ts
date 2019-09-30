@@ -148,7 +148,9 @@ function formatDependencies(dependencies: Dependencies, context: any) {
   );
 
   const allDepsString = `<details>
-<summary><strong>All files potentially affected:</strong></summary>
+<summary><strong>All files potentially affected (total: ${
+    allDeps.length
+  })</strong></summary>
 
 ${allDeps
   .reduce((accumulator, nextDependency) => {
@@ -163,7 +165,7 @@ ${allDeps
       `<details>
 <summary>${getEmojiForFileName(dependency.fileName)} <code><strong>${
         dependency.fileName
-      } (total: ${allDeps.length})</strong></code> (${
+      } (total: ${dependency.dependencies.length})</strong></code> (${
         dependency.dependencies.length
       })</summary>
 
