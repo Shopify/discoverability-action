@@ -128,16 +128,6 @@ function getEmojiForFileName(fileName: string) {
 }
 
 function formatDependencies(dependencies: Dependencies, context: any) {
-  let returnString = `<table><tbody>
-<tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
-<tr><th align="left">Files potentially affected</th><td>${dependencies.reduce(
-    (acc, next) => acc + next.dependencies.length,
-    0,
-  )}</td></tr>
-</tbody></table>
-
-### Details`;
-
   const allDeps = Object.keys(
     dependencies.reduce((acc: Record<string, boolean>, dependency) => {
       dependency.dependencies.forEach((dep) => {
@@ -146,6 +136,13 @@ function formatDependencies(dependencies: Dependencies, context: any) {
       return acc;
     }, {}),
   );
+
+  let returnString = `<table><tbody>
+<tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
+<tr><th align="left">Files potentially affected</th><td>${allDeps.length}</td></tr>
+</tbody></table>
+
+### Details`;
 
   const allDepsString = `<details>
 <summary><strong>All files potentially affected (total: ${
@@ -165,9 +162,7 @@ ${allDeps
       `<details>
 <summary>${getEmojiForFileName(dependency.fileName)} <code><strong>${
         dependency.fileName
-      } (total: ${dependency.dependencies.length})</strong></code> (${
-        dependency.dependencies.length
-      })</summary>
+      } (total: ${dependency.dependencies.length})</strong></code></summary>
 
 #### Files potentially affected (total: ${dependency.dependencies.length})
 
