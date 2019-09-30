@@ -20,6 +20,6 @@
     "skipLibCheck": false
   },
   "paths": {
-    "@shopify/*": ["index.tsx"]
+    "@shopify/*": ["index.ts"]
   }
 }

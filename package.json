@@ -5,8 +5,8 @@
   "version": "0.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ncc build index.tsx --watch --minify",
-    "build": "ncc build index.tsx --minify",
+    "dev": "ncc build index.ts --watch --minify",
+    "build": "ncc build index.ts --minify",
     "test": "",
     "lint": "yarn run eslint '**/*.{js,ts,tsx}'"
   },
