@@ -118,6 +118,15 @@ async function main() {
   }
 }
 
+function getEmojiForFileName(fileName: string) {
+  if (fileName.endsWith('.tsx') || fileName.endsWith('.ts')) {
+    return '🧩';
+  } else if (fileName.endsWith('.scss') || fileName.endsWith('.css')) {
+    return '🎨';
+  }
+  return '❔';
+}
+
 function formatDependencies(dependencies: Dependencies, context: any) {
   let returnString = `<table><tbody>
 <tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
@@ -152,9 +161,11 @@ ${allDeps
   const tables = dependencies.map(
     (dependency) =>
       `<details>
-<summary>🧩 <code><strong>${dependency.fileName} (total: ${
-        allDeps.length
-      })</strong></code> (${dependency.dependencies.length})</summary>
+<summary>${getEmojiForFileName(dependency.fileName)} <code><strong>${
+        dependency.fileName
+      } (total: ${allDeps.length})</strong></code> (${
+        dependency.dependencies.length
+      })</summary>
 
 #### Files potentially affected (total: ${dependency.dependencies.length})
 
