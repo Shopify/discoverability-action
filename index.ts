@@ -129,6 +129,26 @@ function formatDependencies(dependencies: Dependencies, context: any) {
 
 ### Details`;
 
+  const allDeps = Object.keys(
+    dependencies.reduce((acc: Record<string, boolean>, dependency) => {
+      dependency.dependencies.forEach((dep) => {
+        acc[dep] = true;
+      });
+      return acc;
+    }, {}),
+  );
+
+  const allDepsString = `<details>
+<summary><strong>All files impacted:</strong></summary>
+
+${allDeps
+  .reduce((accumulator, nextDependency) => {
+    return `${accumulator}
+- [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
+  }, '')
+  .trim()}
+</summary>`;
+
   const tables = dependencies.map(
     (dependency) =>
       `<details>
@@ -148,6 +168,8 @@ ${dependency.dependencies
   );
 
   returnString = `${returnString}
+
+${allDepsString}
 
 ${tables.join('\n\n')}`;
 
