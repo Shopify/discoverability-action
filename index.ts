@@ -187,8 +187,6 @@ ${tables.join('\n\n')}`;
 function commentMarkup(state: CommentState, text: string | undefined) {
   if (state === CommentState.Loading) {
     return `<!-- discoverability-action -->
-# Loading
-
 💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
 
 ⏳ Please wait while I’m computing the dependency graph…
@@ -200,8 +198,6 @@ Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tool
 `;
   } else if (state === CommentState.Changes) {
     return `<!-- discoverability-action -->
-# Results
-
 💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
 
 ${text}
@@ -212,8 +208,6 @@ This comment automatically updates as changes are made to this pull request.
 Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
   } else if (state === CommentState.NoChanges) {
     return `<!-- discoverability-action -->
-# No changes
-
 💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
 
 No significant changes to \`${CODEBASE_GLOB}\` were detected.
@@ -224,8 +218,6 @@ This comment automatically updates as changes are made to this pull request.
 Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
   } else if (state === CommentState.Error) {
     return `<!-- discoverability-action -->
-# Error
-
 💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
 
 ❌ Something fishy happened. We’re on it!
