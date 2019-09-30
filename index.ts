@@ -139,7 +139,7 @@ function formatDependencies(dependencies: Dependencies, context: any) {
   );
 
   const allDepsString = `<details>
-<summary><strong>All files impacted:</strong></summary>
+<summary><strong>All files potentially affected:</strong></summary>
 
 ${allDeps
   .reduce((accumulator, nextDependency) => {
@@ -147,14 +147,14 @@ ${allDeps
 - [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
   }, '')
   .trim()}
-</summary>`;
+</details>`;
 
   const tables = dependencies.map(
     (dependency) =>
       `<details>
-<summary>🧩 <code><strong>${dependency.fileName}</strong></code> (${
-        dependency.dependencies.length
-      })</summary>
+<summary>🧩 <code><strong>${dependency.fileName} (total: ${
+        allDeps.length
+      })</strong></code> (${dependency.dependencies.length})</summary>
 
 #### Files potentially affected (total: ${dependency.dependencies.length})
 
