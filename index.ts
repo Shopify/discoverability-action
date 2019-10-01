@@ -124,7 +124,7 @@ function getEmojiForFileName(fileName: string) {
   } else if (fileName.endsWith('.scss') || fileName.endsWith('.css')) {
     return '🎨';
   }
-  return '❔';
+  return '📄';
 }
 
 function formatDependencies(dependencies: Dependencies, context: any) {
