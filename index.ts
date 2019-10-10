@@ -240,4 +240,8 @@ Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tool
   return '';
 }
 
+process.argv.forEach((val, index) => {
+  console.log(`${index}: ${val}`);
+});
+
 main();

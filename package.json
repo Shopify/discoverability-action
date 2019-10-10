@@ -8,7 +8,8 @@
     "dev": "ncc build index.ts --watch --minify",
     "build": "ncc build index.ts --minify",
     "test": "",
-    "lint": "yarn run eslint '**/*.{js,ts,tsx}'"
+    "lint": "yarn run eslint '**/*.{js,ts,tsx}'",
+    "splash": "yarn run babel-node --extensions '.tsx','.ts' ./index.ts"
   },
   "repository": {
     "type": "git",
@@ -21,11 +22,6 @@
     "url": "https://github.com/Shopify/discoverability-action/issues"
   },
   "homepage": "https://github.com/Shopify/discoverability-action#readme",
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run build && git add ./dist/index.js"
-    }
-  },
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
     "eslint": "^5.16.0",
@@ -119,6 +115,11 @@
   "dependencies": {
     "@actions/core": "^1.1.1",
     "@actions/github": "^1.1.0",
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/node": "^7.6.3",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-typescript": "^7.6.0",
     "@types/react": "^16.9.2",
     "@types/react-dom": "^16.9.0",
     "node-cmd": "^3.0.0",
