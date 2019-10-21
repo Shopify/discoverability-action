@@ -1,5 +1,6 @@
 import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
+import bugsnag from '@bugsnag/js';
 import {getDependencies, Dependencies} from './splash/treebuilder';
 
 enum CommentState {
@@ -11,6 +12,7 @@ enum CommentState {
 
 const CODEBASE_GLOB = getInput('codebaseGlob');
 const IGNORE_GLOB = getInput('ignoreGlob');
+const bugsnagClient = bugsnag('7dd8d9f045162b5cf94b3f90cb25b07b');
 
 async function main() {
   if (!context.payload.pull_request) {
@@ -108,6 +110,7 @@ async function main() {
     console.log('Done!');
     console.log('============================================');
   } catch (error) {
+    bugsnagClient.notify(new Error(error));
     await client.issues.updateComment({
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
