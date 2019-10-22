@@ -47,7 +47,12 @@ async function main() {
       body: commentMarkup(CommentState.Loading, undefined),
     });
   } else {
+    console.log(context.payload);
+    console.log(JSON.stringify(context.payload));
     console.log('Posting comment...');
+    console.log('owner: ', context.payload.pull_request.base.repo.owner.login);
+    console.log('repo: ', context.payload.pull_request.base.repo.name);
+    console.log('issue_number: ', context.payload.number);
 
     const newComment = await client.issues.createComment({
       owner: context.payload.pull_request.base.repo.owner.login,
