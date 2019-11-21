@@ -1,7 +1,8 @@
 {
   "name": "@shopify/splash",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "@shopify:registry": "https://registry.npmjs.org/"
   },
   "description": "Adds a comment to a pull request with areas of your code to test",
   "private": true,
