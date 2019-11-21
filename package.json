@@ -11,7 +11,8 @@
     "dev": "ncc build index.ts -w -s",
     "build": "yarn run rollup -c",
     "test": "",
-    "lint": "yarn run eslint '**/*.{js,ts,tsx}'"
+    "lint": "yarn run eslint '**/*.{js,ts,tsx}'",
+    "prepublish": "yarn run build"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,7 @@
   "keywords": [],
   "author": "Shopify <dev@shopify.com>",
   "license": "MIT",
-  "types": "index.d.ts",
+  "types": "splash/index.d.ts",
   "bugs": {
     "url": "https://github.com/Shopify/discoverability-action/issues"
   },
