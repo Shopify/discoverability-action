@@ -1,5 +1,5 @@
 {
-  "name": "discoverability-action",
+  "name": "@shopify/splash",
   "publishConfig": {
     "access": "public"
   },
