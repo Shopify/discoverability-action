@@ -5,7 +5,7 @@
   },
   "description": "Adds a comment to a pull request with areas of your code to test",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "index.js",
   "scripts": {
     "dev": "ncc build index.ts -w -s",
