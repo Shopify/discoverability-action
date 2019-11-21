@@ -5,7 +5,6 @@
     "@shopify:registry": "https://registry.npmjs.org/"
   },
   "description": "Adds a comment to a pull request with areas of your code to test",
-  "private": true,
   "version": "0.0.3",
   "main": "index.js",
   "scripts": {
