@@ -1,12 +1,15 @@
 {
   "name": "discoverability-action",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Adds a comment to a pull request with areas of your code to test",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "dev": "ncc build index.ts --watch --minify",
-    "build": "ncc build index.ts --minify",
+    "dev": "ncc build index.ts -w -s",
+    "build": "yarn run rollup -c",
     "test": "",
     "lint": "yarn run eslint '**/*.{js,ts,tsx}'"
   },
@@ -15,19 +18,22 @@
     "url": "git+https://github.com/Shopify/discoverability-action.git"
   },
   "keywords": [],
-  "author": "Andre Rocha",
+  "author": "Shopify <dev@shopify.com>",
   "license": "MIT",
+  "types": "index.d.ts",
   "bugs": {
     "url": "https://github.com/Shopify/discoverability-action/issues"
   },
   "homepage": "https://github.com/Shopify/discoverability-action#readme",
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run build && git add ./dist/index.js"
-    }
-  },
+  "files": [
+    "index.js",
+    "index.es.js",
+    "splash/index.d.ts"
+  ],
   "devDependencies": {
     "@zeit/ncc": "^0.20.5",
+    "babel-core": "6.26.3",
+    "babel-preset-shopify": "20.1.0",
     "eslint": "^5.16.0",
     "eslint-plugin-shopify": "^28.0.0",
     "husky": "^3.0.5",
@@ -125,6 +131,9 @@
     "node-cmd": "^3.0.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "typescript": "^3.6.3"
+    "rollup": "^1.27.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-typescript2": "^0.25.2",
+    "typescript": "^3.7.2"
   }
 }
