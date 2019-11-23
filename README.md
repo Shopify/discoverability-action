@@ -2,7 +2,6 @@
 
 > Adds a comment to a pull request with areas of your code to test
 
-
 ## How to use
 
 Since this is a JavaScript GitHub Action, the code in this repository gets executed directly without installed dependencies. Because of that, contributors need to run a build to ensure that their changes are reflected in the output of the action.
