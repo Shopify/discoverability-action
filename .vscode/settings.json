@@ -15,8 +15,6 @@
     ".{dev,shadowenv.d}": true
   },
   "javascript.validate.enable": false,
-  "prettier.eslintIntegration": true,
-  "prettier.stylelintIntegration": true,
   "search.exclude": {
     "**/node_modules": true
   },
