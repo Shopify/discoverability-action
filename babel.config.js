@@ -1,7 +1,11 @@
 module.exports = function(api) {
   api.cache(true);
+  const runtimePreset = [
+    'babel-preset-shopify/node',
+    {modules: 'commonjs', typescript: true},
+  ];
 
   return {
-    presets: [['babel-preset-shopify/web', {modules: false, typescript: true}]],
+    presets: [runtimePreset, ['babel-preset-shopify/react', {hot: false}]],
   };
 };

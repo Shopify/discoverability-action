@@ -1,14 +1,14 @@
 import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
 import bugsnag from '@bugsnag/js';
-import {getDependencies, Dependencies} from './splash/treebuilder';
+import {getDependencies, Dependencies} from '@shopify/splash';
 
-enum CommentState {
-  Loading,
-  Error,
-  NoChanges,
-  Changes,
-}
+const CommentState = {
+  Loading: 'Loading',
+  Error: 'Error',
+  NoChanges: 'NoChanges',
+  Changes: 'Changes',
+};
 
 const CODEBASE_GLOB = getInput('codebaseGlob');
 const IGNORE_GLOB = getInput('ignoreGlob');
@@ -28,11 +28,11 @@ async function main() {
     issue_number: context.payload.number, // eslint-disable-line babel/camelcase
   });
 
-  let comment = commentsList.data.find((comment) => {
+  let comment = commentsList.data.find((singleComment) => {
     return (
-      comment.user.type === 'Bot' &&
-      comment.user.login === 'github-actions[bot]' &&
-      comment.body.slice(0, 31) === '<!-- discoverability-action -->'
+      singleComment.user.type === 'Bot' &&
+      singleComment.user.login === 'github-actions[bot]' &&
+      singleComment.body.slice(0, 31) === '<!-- discoverability-action -->'
     );
   });
 
@@ -121,7 +121,7 @@ async function main() {
   }
 }
 
-function getEmojiForFileName(fileName: string) {
+function getEmojiForFileName(fileName) {
   if (fileName.endsWith('.tsx') || fileName.endsWith('.ts')) {
     return '🧩';
   } else if (fileName.endsWith('.scss') || fileName.endsWith('.css')) {
@@ -130,9 +130,9 @@ function getEmojiForFileName(fileName: string) {
   return '📄';
 }
 
-function formatDependencies(dependencies: Dependencies, context: any) {
+function formatDependencies(dependencies, localContext) {
   const allDeps = Object.keys(
-    dependencies.reduce((acc: Record<string, boolean>, dependency) => {
+    dependencies.reduce((acc, dependency) => {
       dependency.dependencies.forEach((dep) => {
         acc[dep] = true;
       });
@@ -155,7 +155,7 @@ function formatDependencies(dependencies: Dependencies, context: any) {
 ${allDeps
   .reduce((accumulator, nextDependency) => {
     return `${accumulator}
-- [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
+- [\`${nextDependency}\`](https://github.com/${localContext.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
   }, '')
   .trim()}
 </details>`;
@@ -172,7 +172,7 @@ ${allDeps
 ${dependency.dependencies
   .reduce((accumulator, nextDependency) => {
     return `${accumulator}
-- [\`${nextDependency}\`](https://github.com/${context.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
+- [\`${nextDependency}\`](https://github.com/${localContext.payload.pull_request.base.repo.owner.login}/${context.payload.pull_request.base.repo.name}/blob/${context.payload.pull_request.head.ref}${nextDependency})`;
   }, '')
   .trim()}
 </details>`,
@@ -187,7 +187,7 @@ ${tables.join('\n\n')}`;
   return returnString;
 }
 
-function commentMarkup(state: CommentState, text: string | undefined) {
+function commentMarkup(state, text) {
   if (state === CommentState.Loading) {
     return `<!-- discoverability-action -->
 💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
