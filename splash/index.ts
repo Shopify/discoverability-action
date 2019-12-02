@@ -158,6 +158,6 @@ export async function getDependencies(
 
   return fileGlobs.map((fileGlob, index) => ({
     fileName: fileGlob,
-    dependencies: dependencies[index],
+    dependencies: dependencies[index] || [],
   }));
 }
