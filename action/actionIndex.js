@@ -110,7 +110,7 @@ async function main() {
     console.log('Done!');
     console.log('============================================');
   } catch (error) {
-    bugsnagClient.notify(new Error(error));
+    bugsnagClient.notify(error);
     await client.issues.updateComment({
       owner: context.payload.pull_request.base.repo.owner.login,
       repo: context.payload.pull_request.base.repo.name,
