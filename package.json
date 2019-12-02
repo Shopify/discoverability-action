@@ -9,6 +9,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "ncc build index.ts -w -s",
+    "clean": "rm -rf index.d.ts index.es.js index.js",
+    "prebuild": "yarn run clean",
     "build": "yarn run rollup -c",
     "test": "",
     "lint": "yarn run eslint '**/*.{js,ts,tsx}'",
