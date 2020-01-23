@@ -1,7 +1,7 @@
 import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
 import bugsnag from '@bugsnag/js';
-import {getDependencies, Dependencies} from '@shopify/splash';
+import {getDependencies} from '@shopify/splash';
 
 const CommentState = {
   Loading: 'Loading',
@@ -9,6 +9,9 @@ const CommentState = {
   NoChanges: 'NoChanges',
   Changes: 'Changes',
 };
+
+const FIRST_QUARTILE = getInput('firstQuartile');
+const THIRD_QUARTILE = getInput('thirdQuartile');
 
 const CODEBASE_GLOB = getInput('codebaseGlob');
 const IGNORE_GLOB = getInput('ignoreGlob');
@@ -46,19 +49,6 @@ async function main() {
       comment_id: comment.id, // eslint-disable-line babel/camelcase
       body: commentMarkup(CommentState.Loading, undefined),
     });
-  } else {
-    console.log('Posting comment...');
-
-    const newComment = await client.issues.createComment({
-      owner: context.payload.pull_request.base.repo.owner.login,
-      repo: context.payload.pull_request.base.repo.name,
-      issue_number: context.payload.number, // eslint-disable-line babel/camelcase
-      body: commentMarkup(CommentState.Loading, undefined),
-    });
-
-    comment = newComment.data;
-
-    console.log('Done!');
   }
 
   try {
@@ -87,36 +77,81 @@ async function main() {
     console.log('These are the dependencies calculated:');
     console.log(dependencies);
     console.log('============================================');
-    console.log('Updating comment...');
 
     if (dependencies.some((dependency) => dependency.dependencies.length > 0)) {
       const formattedDependencies = formatDependencies(dependencies, context);
 
-      await client.issues.updateComment({
-        owner: context.payload.pull_request.base.repo.owner.login,
-        repo: context.payload.pull_request.base.repo.name,
-        comment_id: comment.id, // eslint-disable-line babel/camelcase
-        body: commentMarkup(CommentState.Changes, formattedDependencies),
-      });
-    } else {
+      if (comment) {
+        console.log('Updating comment...');
+
+        await client.issues.updateComment({
+          owner: context.payload.pull_request.base.repo.owner.login,
+          repo: context.payload.pull_request.base.repo.name,
+          comment_id: comment.id, // eslint-disable-line babel/camelcase
+          body: commentMarkup(CommentState.Changes, formattedDependencies),
+        });
+      } else {
+        console.log('Posting comment...');
+
+        const newComment = await client.issues.createComment({
+          owner: context.payload.pull_request.base.repo.owner.login,
+          repo: context.payload.pull_request.base.repo.name,
+          issue_number: context.payload.number, // eslint-disable-line babel/camelcase
+          body: commentMarkup(CommentState.Changes, formattedDependencies),
+        });
+
+        comment = newComment.data;
+      }
+    } else if (comment) {
+      console.log('Updating comment...');
+
       await client.issues.updateComment({
         owner: context.payload.pull_request.base.repo.owner.login,
         repo: context.payload.pull_request.base.repo.name,
         comment_id: comment.id, // eslint-disable-line babel/camelcase
         body: commentMarkup(CommentState.NoChanges, undefined),
       });
+    } else {
+      console.log('Posting comment...');
+
+      const newComment = await client.issues.createComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        issue_number: context.payload.number, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.NoChanges, undefined),
+      });
+
+      comment = newComment.data;
     }
 
     console.log('Done!');
     console.log('============================================');
   } catch (error) {
     bugsnagClient.notify(error);
-    await client.issues.updateComment({
-      owner: context.payload.pull_request.base.repo.owner.login,
-      repo: context.payload.pull_request.base.repo.name,
-      comment_id: comment.id, // eslint-disable-line babel/camelcase
-      body: commentMarkup(CommentState.Error, error),
-    });
+
+    if (comment) {
+      console.log('Updating comment...');
+
+      await client.issues.updateComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        comment_id: comment.id, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.Error, error),
+      });
+    } else {
+      console.log('Posting comment...');
+
+      const newComment = await client.issues.createComment({
+        owner: context.payload.pull_request.base.repo.owner.login,
+        repo: context.payload.pull_request.base.repo.name,
+        issue_number: context.payload.number, // eslint-disable-line babel/camelcase
+        body: commentMarkup(CommentState.Error, error),
+      });
+
+      comment = newComment.data;
+
+      console.log('Done!');
+    }
     throw error;
   }
 }
@@ -140,12 +175,27 @@ function formatDependencies(dependencies, localContext) {
     }, {}),
   );
 
-  let returnString = `<table><tbody>
-<tr><th align="left">Files modified</th><td>${dependencies.length}</td></tr>
-<tr><th align="left">Files potentially affected</th><td>${allDeps.length}</td></tr>
-</tbody></table>
+  let returnString;
 
-### Details`;
+  if (allDeps.length <= FIRST_QUARTILE) {
+    returnString = `🟢 This pull request modifies <strong>${dependencies.length}</strong> files and might impact <strong>${allDeps.length}</strong> other files.
+
+<details>
+<summary><strong>Details:</strong></summary>`;
+  } else if (
+    allDeps.length > FIRST_QUARTILE &&
+    allDeps.length <= THIRD_QUARTILE
+  ) {
+    returnString = `🟡 This pull request modifies <strong>${dependencies.length}</strong> files and might impact <strong>${allDeps.length}</strong> other files. This is an average splash zone for a change, remember to tophat areas that could be affected.
+
+<details>
+<summary><strong>Details:</strong></summary>`;
+  } else if (allDeps.length > THIRD_QUARTILE) {
+    returnString = `🔴 This pull request modifies <strong>${dependencies.length}</strong> files and might impact <strong>${allDeps.length}</strong> other files. Because this is a larger than average splash zone for a change, remember to tophat areas that could be affected..
+
+<details>
+<summary><strong>Details:</strong></summary>`;
+  }
 
   const allDepsString = `<details>
 <summary><strong>All files potentially affected (total: ${
@@ -182,7 +232,8 @@ ${dependency.dependencies
 
 ${allDepsString}
 
-${tables.join('\n\n')}`;
+${tables.join('\n\n')}
+</details>`;
 
   return returnString;
 }
@@ -190,55 +241,28 @@ ${tables.join('\n\n')}`;
 function commentMarkup(state, text) {
   if (state === CommentState.Loading) {
     return `<!-- discoverability-action -->
-💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
-
 ⏳ Please wait while I’m computing the dependency graph…
-
----
-
-This comment automatically updates as changes are made to this pull request.
-Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).
-`;
+This comment will automatically update in a few minutes`;
   } else if (state === CommentState.Changes) {
     return `<!-- discoverability-action -->
-💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
-
-${text}
-
----
-
-This comment automatically updates as changes are made to this pull request.
-Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
+${text}`;
   } else if (state === CommentState.NoChanges) {
     return `<!-- discoverability-action -->
-💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
-
-No significant changes to \`${CODEBASE_GLOB}\` were detected.
-
----
-
-This comment automatically updates as changes are made to this pull request.
-Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
+🟢 No significant changes to \`${CODEBASE_GLOB}\` were detected.`;
   } else if (state === CommentState.Error) {
     return `<!-- discoverability-action -->
-💦 Potential splash zone of changes introduced to \`${CODEBASE_GLOB}\` in this pull request:
-
-❌ Something fishy happened. We’re on it!
-
-cc @amrocha @kaelig
+❌ Something went wrong with the Discoverability Github Action. This doesn't stop you from shipping your changes.
 
 <details>
-<summary>Error message:</summary>
+<summary><strong>Details:</strong></summary>
 
 <code>
 ${text}
 </code>
 </details>
 
----
-
-This comment automatically updates as changes are made to this pull request.
-Feedback, troubleshooting: open an issue or reach out on Slack in [#polaris-tooling](https://shopify.slack.com/messages/CCNUS0FML).`;
+We’ve been notified and will take a look.
+If you need immediate help, ping @amrocha or @kaelig on Slack`;
   }
   return '';
 }
