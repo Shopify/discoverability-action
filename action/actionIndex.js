@@ -191,7 +191,7 @@ function formatDependencies(dependencies, localContext) {
 <details>
 <summary><strong>Details:</strong></summary>`;
   } else if (allDeps.length > THIRD_QUARTILE) {
-    returnString = `🔴 This pull request modifies <strong>${dependencies.length}</strong> files and might impact <strong>${allDeps.length}</strong> other files. Because this is a larger than average splash zone for a change, remember to tophat areas that could be affected..
+    returnString = `🔴 This pull request modifies <strong>${dependencies.length}</strong> files and might impact <strong>${allDeps.length}</strong> other files. Because this is a larger than average splash zone for a change, remember to tophat areas that could be affected.
 
 <details>
 <summary><strong>Details:</strong></summary>`;
