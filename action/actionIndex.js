@@ -1,6 +1,7 @@
 import {getInput} from '@actions/core';
 import {GitHub, context} from '@actions/github';
 import bugsnag from '@bugsnag/js';
+/* eslint-disable-next-line */
 import {getDependencies} from '@shopify/splash';
 
 const CommentState = {

@@ -6,12 +6,11 @@
   },
   "description": "Adds a comment to a pull request with areas of your code to test",
   "version": "0.0.8",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "ncc build index.ts -w -s",
-    "clean": "rm -rf index.d.ts index.es.js index.js",
+    "clean": "rm -rf dist/",
     "prebuild": "yarn run clean",
-    "build": "yarn run rollup -c",
+    "build": "yarn run tsc -p tsconfig.build.json",
     "test": "",
     "lint": "yarn run eslint '**/*.{js,ts,tsx}'",
     "prepublish": "yarn run build"
@@ -23,27 +22,13 @@
   "keywords": [],
   "author": "Shopify <dev@shopify.com>",
   "license": "MIT",
-  "types": "splash/index.d.ts",
   "bugs": {
     "url": "https://github.com/Shopify/discoverability-action/issues"
   },
   "homepage": "https://github.com/Shopify/discoverability-action#readme",
   "files": [
-    "index.js",
-    "index.es.js",
-    "splash/index.d.ts"
+    "dist/"
   ],
-  "devDependencies": {
-    "@zeit/ncc": "^0.20.5",
-    "babel-core": "6.26.3",
-    "babel-preset-shopify": "^20.1.0",
-    "eslint": "^5.16.0",
-    "eslint-plugin-shopify": "^28.0.0",
-    "husky": "^3.0.5",
-    "prettier": "^1.16.4",
-    "stylelint": "^9.10.1",
-    "stylelint-config-shopify": "^7.1.0"
-  },
   "prettier": {
     "arrowParens": "always",
     "singleQuote": true,
@@ -53,94 +38,27 @@
   "eslintConfig": {
     "extends": [
       "plugin:shopify/typescript",
-      "plugin:shopify/react",
       "plugin:shopify/jest",
       "plugin:shopify/node",
       "plugin:shopify/prettier"
     ],
-    "settings": {
-      "react": {
-        "version": "16.7"
-      }
-    },
     "rules": {
-      "no-console": "off",
-      "node/exports-style": "off",
-      "react/prop-types": "off",
-      "shopify/jsx-no-hardcoded-content": "off",
-      "shopify/jsx-prefer-fragment-wrappers": "off"
-    },
-    "overrides": [
-      {
-        "files": [
-          "**/rollup.config.js",
-          "**/tests/*.js",
-          "**/scripts/*.js"
-        ],
-        "rules": {
-          "import/no-extraneous-dependencies": "off",
-          "node/no-extraneous-require": "off"
-        }
-      },
-      {
-        "files": [
-          "packages/polaris-icons/src/index.ts",
-          "packages/polaris-icons-internal/src/index.ts"
-        ],
-        "rules": {
-          "shopify/images-no-direct-imports": "off"
-        }
-      },
-      {
-        "files": [
-          "packages/app-icon-explorer/**/*"
-        ],
-        "rules": {
-          "id-length": [
-            "error",
-            {
-              "min": 2,
-              "exceptions": [
-                "_",
-                "q"
-              ]
-            }
-          ]
-        }
-      }
-    ]
-  },
-  "stylelint": {
-    "extends": [
-      "stylelint-config-shopify/prettier"
-    ],
-    "rules": {
-      "selector-pseudo-class-no-unknown": [
-        true,
-        {
-          "ignorePseudoClasses": [
-            "global"
-          ]
-        }
-      ]
+      "no-console": "off"
     }
+  },
+  "devDependencies": {
+    "@shopify/typescript-configs": "^2.0.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-shopify": "^28.0.0",
+    "prettier": "^1.16.4"
   },
   "dependencies": {
     "@actions/core": "^1.1.1",
     "@actions/github": "^1.1.0",
-    "@babel/core": "^7.7.4",
-    "@babel/node": "^7.7.4",
     "@bugsnag/js": "^6.4.3",
-    "@shopify/splash": "^0.0.5",
-    "@types/react": "^16.9.2",
-    "@types/react-dom": "^16.9.0",
     "glob": "^7.1.6",
     "node-cmd": "^3.0.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
-    "rollup": "^1.27.2",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-typescript2": "^0.25.2",
+    "tslib": "^1.11.1",
     "typescript": "^3.7.2"
   }
 }
