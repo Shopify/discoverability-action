@@ -13,7 +13,7 @@
     "build": "yarn run tsc -p tsconfig.build.json",
     "test": "",
     "lint": "yarn run eslint '**/*.{js,ts,tsx}'",
-    "prepublish": "yarn run build; mv splash/README.md ."
+    "prepublish": "yarn run build; cp splash/README.md ."
   },
   "repository": {
     "type": "git",
