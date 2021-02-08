@@ -263,7 +263,7 @@ ${text}
 </details>
 
 We’ve been notified and will take a look.
-If you need immediate help, ping @amrocha or @kaelig on Slack`;
+If you need immediate help, ping the #polaris team on Slack`;
   }
   return '';
 }
